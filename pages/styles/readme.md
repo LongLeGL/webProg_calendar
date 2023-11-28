@@ -1,0 +1,1 @@
+This folder is for css files made specifically for a certain page. This helps avoid overloading the index.css file
