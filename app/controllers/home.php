@@ -4,34 +4,28 @@ class Home extends Controller
 {
 	private $model;
 
-    public function __construct()
-	{
+    public function __construct(){
         $this->model = $this->model('homeModel');
     }
 
-	public function render()
-	{
+	public function render(){
 		$this->view("master_layout", [
 			'page' => 'home',
 		]);
 	}
 
-	public function fetchEvents()
-    {
-		// if (isset($_POST['date']) && isset($_POST['time'])) {
-		// 	return $this->model->isAvailableTimeSlot($_POST['date'], $_POST['time']);
-		// }
-
-		$events = $this->model->getAll();
+	public function fetchEvents(){
+		$events = $this->model->getEvents();
 
 		$result = [];
 		while ($row = mysqli_fetch_array($events)) { 
 			$event = [
 				'id' => $row['id'],
 				'fullName' => $row['fullName'],
-				'date' => $row['date'],
-				'startTime' => $row['startTime'],
 				'creatorId' => $row['creatorId'],
+				'start' => $row['start'],
+				'end' => $row['end'],
+				'backgroundColor' => $row['backgroundColor'],
 			];
 		
 			$result[] = $event;
@@ -39,30 +33,35 @@ class Home extends Controller
 		echo json_encode($result);
     }
 
-	public function insert($id, $fullName, $date, $startTime)
-    {
-		$result = $this->model->insert($id, $fullName, $date, $startTime, $_SESSION['username']);
-		if ($result) {
-			$_SESSION['message'] = "New appointment is inserted successfully!";
-			header('Location: index.php?page=home');
-		} else {
-			$_SESSION['message'] = 'New appointment insertion failed';
-			header('Location: index.php?page=home');
-		}
-		return $result;
-    }
-
-	public function checkTimeSlot()
-    {
-		if (isset($_POST['date']) && isset($_POST['time'])) {
-			return $this->model->isAvailableTimeSlot($_POST['date'], $_POST['time']);
+	public function insert($id, $fullName, $start, $end){
+		if ($_SESSION['userLevel'] == 'doctor') {
+			$result = $this->model->insert($id, 'Doctor is busy!', 'doctor', $start, $end, '#9e2642');
+			echo json_encode($result);
+		} 
+		else {
+			$result = $this->model->insert($id, $fullName, $_SESSION['username'], $start, $end, '#3788d8');
+			echo json_encode($result);
 		}
     }
 
-	public function checkUnexpiredEvent()
-	{
-		return $this->model->checkUnexpiredEvent();
+	public function havePendingEvent(){
+		$result = $this->model->getPendingEventByCurrentUser();
+		$row = mysqli_fetch_assoc($result);
+
+		echo json_encode($row["count"] > 0);
 	}
+
+	public function timeSlotIsAvailable($start, $end){
+		$result = $this->model->getEventByDateTime($start, $end);
+		$row = mysqli_fetch_assoc($result);
+
+		echo json_encode($row["count"] == 0);
+    }
+
+	public function delete($id){
+		$result = $this->model->delete($id);
+		echo json_encode($result);
+    }
 }
 
 ?>
