@@ -7,10 +7,8 @@ email: team member's email <i>(for testing with email feature)</i><br>
 pass: patient   <i>(should be the same for all members for easy testing)</i>
 
 <h3>Database: `appointment`</h3>
---
--- Table structure for table `appointments`
---
-
+Table structure for table `appointments`:
+```
 CREATE TABLE `appointments` (
   `id` char(36) NOT NULL,
   `fullName` varchar(255) NOT NULL,
@@ -19,3 +17,4 @@ CREATE TABLE `appointments` (
   `end` datetime NOT NULL,
   `backgroundColor` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+```
