@@ -7,6 +7,7 @@ email: team member's email <i>(for testing with email feature)</i><br>
 pass: patient   <i>(should be the same for all members for easy testing)</i>
 
 <h3>Database: `appointment`</h3>
+
 Table structure for table `appointments`:
 ```
 CREATE TABLE `appointments` (
