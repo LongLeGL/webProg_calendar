@@ -55,7 +55,7 @@ class Login extends Controller
 					$_SESSION['authenticated'] = true;
 					// $_SESSION['authenticated']["user_level"] = $user_level;
 
-					header('Location: index.php?page=home');
+					header('Location: index.php?page=calendar');
 				}
 				else {
 					$this->view("auth_layout", [
@@ -76,6 +76,6 @@ class Login extends Controller
 			setcookie("district", '', time() + 3600, "/");
 			setcookie("ward", '', time() + 3600, "/");
 		}
-		header('Location: index.php?page=home');
+		header('Location: index.php?page=calendar');
 	}
 }

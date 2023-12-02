@@ -6,7 +6,7 @@ class Database
 	protected $serverName = 'localhost';
 	protected $username = 'root';
 	protected $password = '';
-	protected $dbname = 'appointment';
+	protected $dbname = 'ConvenientAppointment';
 
 	public function __construct()
 	{
