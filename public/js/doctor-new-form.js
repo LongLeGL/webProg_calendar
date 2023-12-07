@@ -1,18 +1,16 @@
-var startHour = document.getElementById('doctor-new-start-hour');
-var endHour = document.getElementById('doctor-new-end-hour');
-
-startHour.addEventListener('doctor-new-change', function () {
-	var selectedStartHour = startHour.value;
-
-	for (var i = parseInt(selectedStartHour); i <= 21; i++) {
-		var option = document.createElement('option');
-		option.value = i < 10 ? '0' + i : '' + i;
-		option.textContent = option.value;
-		endHour.appendChild(option);
-	}
-});
-
 $(document).ready(function () {
+	var endHour = document.getElementById('doctor-new-end-hour');
+	$('#doctor-new-start-hour').on('change', function () {
+		endHour.innerHTML = '';
+		endHour.innerHTML = '<option selected>Hour</option>';
+		for (var i = parseInt(document.getElementById('doctor-new-start-hour').value); i <= 21; i++) {
+			var option = document.createElement('option');
+			option.value = i < 10 ? '0' + i : '' + i;
+			option.textContent = option.value;
+			endHour.appendChild(option);
+		}
+	});
+
 	$('#doctor-new-start-minute').on('change', function () {
 		if ($(this).val() !== 'Min') {
 			synchronizeEndMinute();

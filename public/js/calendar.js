@@ -1,12 +1,15 @@
 document.addEventListener('DOMContentLoaded', function () {
 	const ssRole = document.getElementById('ssRole').value;
 	const ssId = document.getElementById('ssId').value;
+	const ssDoctorId = document.getElementById('ssDoctorId').value;
 
 
 	const calendarEl = document.getElementById('calendar');
 	const patientNewModal = new bootstrap.Modal(document.getElementById('patient-new-modal'));
 	const doctorNewModal = new bootstrap.Modal(document.getElementById('doctor-new-modal'));
+
 	var eventsData = []
+	var doctorOccupiedEvents = []
 
 	function fetchEventsFromDB() {
         // Fetch events from the server
@@ -27,9 +30,12 @@ document.addEventListener('DOMContentLoaded', function () {
 				patientName: event.patientName,
 				doctorId: event.doctorId,
 				doctorName: event.doctorName,
+				status: event.status,
 				title: ssRole == 'doctor' ? event.patientId == null ? "" : event.patientName
 										  : event.status,
-				backgroundColor: ssRole == 'doctor' ? event.patientId == null ? "#FF2c2c" : "#3788d8"
+				backgroundColor: ssRole == 'doctor' ? event.patientId == null 	? "#FF2c2c" //red
+																				: event.status == 'pending' ? "#FFD700" //yellow
+																											: "#3788d8" //blue
 													: event.patientId == ssId ? "#3788d8" : "#FF2c2c",
 				allDay: false,
 				editable: false,
@@ -83,6 +89,65 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+	function getEventByDateTime(start, end) {
+		return fetch('index.php?page=calendar/getEventByDateTime/' +start+ "/" +end, {
+			method: 'GET',
+		}).then(response => {
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+			return response.json();
+		}).then(data => {
+			doctorOccupiedEvents = []
+			doctorOccupiedEvents = data.map(event => ({
+				id: event.id,
+				start: new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+				end: new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+				patientId: event.patientId,
+				patientName: event.patientName,
+				doctorId: event.doctorId,
+				doctorName: event.doctorName,
+				status: event.status,
+			}));
+		}).catch(error => {
+			console.error('Error checking:', error);
+		});
+	}
+
+
+	// function generateTimeSlots(startTime, endTime, interval) {
+	// 	const timeSlots = [];
+	// 	for (let time = startTime.getTime(); time < endTime.getTime(); time += interval) {
+	// 		const localTime = new Date(time);
+	// 		const formattedTime = localTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+	// 		timeSlots.push(formattedTime);
+	// 	}
+	// 	return timeSlots;
+	// }
+
+	// function getOccupiedTimeSlotsByDoctorAndDate(doctorId, date) {
+	// 	return fetch('index.php?page=calendar/getOccupiedTimeSlotsByDoctorAndDate', {
+	// 		method: 'POST',
+	// 		headers: {
+	// 			'Content-Type': 'application/json',
+	// 		},
+	// 		body: JSON.stringify({
+	// 			doctorId: doctorId,
+	// 			date: date,
+	// 		}),
+	// 	}).then(response => {
+	// 		if (!response.ok) {
+	// 			throw new Error('Network response was not ok');
+	// 		}
+	// 		return response.json(); 
+	// 	}).then(data => {
+	// 		// Handle the response from the server if needed
+	// 		console.log('Data sent to server to getOccupiedTimeSlotsByDoctorAndDate:', data);
+	// 	}).catch(error => {
+	// 		console.error('Error during getOccupiedTimeSlotsByDoctorAndDate operation:', error);
+	// 	});
+	// }
+
 	function showNewEventForm(selectedDate) {
 		if (ssRole == 'doctor') {
 			doctorNewForm.reset();
@@ -93,6 +158,41 @@ document.addEventListener('DOMContentLoaded', function () {
 		else {
 			patientNewForm.reset();
 			document.getElementById('patient-new-date').value = moment(selectedDate).format('MMMM D, YYYY');
+
+			// const toggleButtonsContainer = document.getElementById('patient-new-time-slot');
+			// toggleButtonsContainer.innerHTML = '';
+			// const startTime = new Date('1970-01-01T08:00:00Z');
+			// const endTime = new Date('1970-01-01T18:00:00Z');
+			// const interval = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+			// getOccupiedTimeSlotsByDoctorAndDate(ssDoctorId, selectedDate)
+			// 	.then(occupiedTimeSlots => {
+			// 		console.log(occupiedTimeSlots)
+			// 		const timeSlots = generateTimeSlots(startTime, endTime, interval);
+					
+			// 		timeSlots.forEach(formattedTime => {
+			// 			const button = document.createElement('div');
+			// 			button.id = formattedTime;
+			// 			button.textContent = formattedTime;
+			// 			button.classList.add('col-auto', 'toggle-button');
+
+			// 			// Check if the formattedTime is in the occupiedTimeSlots
+			// 			if (occupiedTimeSlots.includes(formattedTime)) {
+			// 				button.classList.add('disabled');
+			// 			}
+
+			// 			button.addEventListener('click', function () {
+			// 				if (!this.classList.contains('disabled')) {
+			// 					toggleButtonsContainer.querySelectorAll('.toggle-button').forEach(btn => {
+			// 						btn.classList.remove('selected');
+			// 					});
+			// 					this.classList.toggle('selected');
+			// 				}
+			// 			});
+
+			// 			toggleButtonsContainer.appendChild(button);
+			// 		});
+			// 	});
 
 			// Show the modal
 			patientNewModal.show();
@@ -216,13 +316,13 @@ document.addEventListener('DOMContentLoaded', function () {
 							document.getElementById('patient-cancel-patient-name').value = eventsData[eventIndex].patientName;
 						}
 
-						document.getElementById(role + 'cancel-date').value = moment(eventsData[eventIndex].start).format('MMMM D, YYYY');
-						document.getElementById(role + 'cancel-start').value = moment(eventsData[eventIndex].start).format('HH:mm');
-						document.getElementById(role + 'cancel-end').value = moment(eventsData[eventIndex].end).format('HH:mm');
+						document.getElementById(role + '-cancel-date').value = moment(eventsData[eventIndex].start).format('MMMM D, YYYY');
+						document.getElementById(role + '-cancel-start').value = moment(eventsData[eventIndex].start).format('HH:mm');
+						document.getElementById(role + '-cancel-end').value = moment(eventsData[eventIndex].end).format('HH:mm');
 
 						modal.show();
 
-						document.getElementById(role + 'cancel-button').addEventListener('click', function () {
+						document.getElementById(role + '-cancel-button').addEventListener('click', function () {
 							deleteEventFromDB(info.event.id);
 							calendar.getEventById(info.event.id).remove();
 							modal.hide();
@@ -269,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 
 	const doctorNewForm = document.getElementById('doctor-new-form');
-	doctorNewForm.addEventListener('submit', function(event) {
+	doctorNewForm.addEventListener('submit', function(event) {		
 		event.preventDefault(); // prevent default form submission
 	
 		const id = uuidv4();
@@ -282,14 +382,93 @@ document.addEventListener('DOMContentLoaded', function () {
 		const start = moment(date).format('YYYY-MM-DD') + " " + moment({ hour: startHour, minute: startMinute }).format('HH:mm');
 		const end = moment(date).format('YYYY-MM-DD') + " " + moment({ hour: endHour, minute: endMinute }).format('HH:mm');
 
-		insertEventIntoDB(id, start, end);
-		fetchEventsFromDB();
+		document.getElementById('doctor-occupied-start').value = start
+		document.getElementById('doctor-occupied-end').value = end
 
-		doctorNewModal.hide();
-		doctorNewForm.reset();
+		getEventByDateTime(start, end).then(events => {
+			if (!Array.isArray(events)) {
+				events = [events];
+			}
+
+			if (events.length > 0) {
+				const doctorOccupiedModal = new bootstrap.Modal(document.getElementById('doctor-occupied-modal'));
+				events.forEach(event => {
+					const startTime = new Date(event.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+					const endTime = new Date(event.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+					// Create a form-row
+					const formRow = document.createElement('div');
+					formRow.classList.add('form-row');
+			
+					// Create the name element
+					const nameElement = document.createElement('div');
+					nameElement.classList.add('name');
+					nameElement.textContent = startTime + ' - ' + endTime; // Set the appropriate text
+					formRow.appendChild(nameElement);
+			
+					// Create the value element with an input
+					const valueElement = document.createElement('div');
+					valueElement.classList.add('value');
+					const inputGroup = document.createElement('div');
+					inputGroup.classList.add('input-group');
+			
+					const input = document.createElement('input');
+					input.classList.add('input--style-5', 'form-control');
+					input.type = 'text';
+					input.value = event.patientName; // Set the appropriate value
+					input.disabled = true;
+			
+					inputGroup.appendChild(input);
+					valueElement.appendChild(inputGroup);
+					formRow.appendChild(valueElement);
+			
+					// Append the form-row to the container
+					document.getElementById('doctor-occupied-form').appendChild(formRow);
+				});
+
+				// Append the "Cancel" button
+				const cancelButton = document.createElement('div');
+				cancelButton.classList.add('form-btn');
+				cancelButton.innerHTML = '<button class="cancel-btn" id="doctor-occupied-button">Cancel All</button>';
+				document.getElementById('doctor-occupied-form').appendChild(cancelButton);
+				
+				doctorNewModal.hide();
+				doctorNewForm.reset();
+				doctorOccupiedModal.show();
+			}
+			else {
+				insertEventIntoDB(id, start, end);
+				fetchEventsFromDB();
+
+				doctorNewModal.hide();
+				doctorNewForm.reset();
+			}
+		})
 	});
   
 	doctorNewModal._element.addEventListener('hide.bs.modal', function () {
 		doctorNewForm.reset(); 
+	});
+
+	const doctorOccupiedForm = document.getElementById('doctor-occupied-form');
+	doctorOccupiedForm.addEventListener('submit', function(event) {		
+		event.preventDefault(); // prevent default form submission
+	
+		if (doctorOccupiedEvents.length > 0) {
+			doctorOccupiedEvents.forEach(event => {
+				deleteEventFromDB(event.id)
+			});
+		}
+
+		const id = uuidv4();
+		const start = document.getElementById('doctor-occupied-start').value;
+		const end = document.getElementById('doctor-occupied-end').value
+		
+		insertEventIntoDB(id, start, end);
+		fetchEventsFromDB();
+	});
+  
+	doctorNewModal._element.addEventListener('hide.bs.modal', function () {
+		doctorOccupiedForm.reset(); 
 	});
 });

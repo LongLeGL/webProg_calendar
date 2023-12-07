@@ -1010,3 +1010,24 @@
 	  -o-transform: skewY(10deg);
 	  transform: skewY(10deg);
 	  background-color: #fff; }
+
+.toggle-button {
+	width: 40px;
+	height: 40px;
+	background-color: #e5e5e5;
+	color: #555;
+	text-align: center;
+	line-height: 40px;
+	cursor: pointer;
+	user-select: none;
+}
+
+.toggle-button.disabled {
+	background-color: #ff4d4d;
+	cursor: not-allowed;
+}
+
+.toggle-button.selected {
+	background-color: #4285f4;
+	cursor: not-allowed;
+}
