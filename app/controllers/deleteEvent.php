@@ -2,10 +2,10 @@
     include('email.php');
 
     session_start();
-    $_SESSION['role'] = "doctor";                                                       // test
-    $_SESSION['uId'] = 1;                                                               // test
+    // $_SESSION['role'] = "doctor";                                                       // test
+    // $_SESSION['uId'] = 4;                                                               // test
     // $_SESSION['role'] = "patient";                                                      // test
-    // $_SESSION['uId'] = 99;                                                              // test
+    // $_SESSION['uId'] = 1;                                                              // test
 
     if (!isset($_SESSION['role'])){
         echo("Must be signed in as a doctor or patient to remove an event !");
@@ -25,19 +25,12 @@
         exit();
     }
     $event_id = $_GET['eid'];
-    // if (!isset($_GET['action'])){
-    //     echo("No action param(reject/cancel) provided !");
-    //     session_abort();
-    //     // header("Location: index.php");
-    //     exit();
-    // }
-    // $action = $_GET['action'];
 
     $connection = 'home';
 	$serverName = 'localhost';
 	$username = 'root';
 	$password = '';
-	$dbname = 'convenientappointment';
+	$dbname = 'ConvenientAppointment';
 
     $conn = new mysqli($serverName, $username, $password, $dbname);
     if ($conn->connect_error) {
@@ -45,62 +38,64 @@
     }
 
     // Check if provided event id is valid
-    $event = $conn->query("SELECT * FROM `event` WHERE ID=$event_id");
+    $event = $conn->query("SELECT * FROM `events` WHERE id='$event_id'");
 
     if (!$event || $event->num_rows <= 0){
         echo("Cannot find Event $event_id !");
     }
     else{
+        $event = $event->fetch_assoc();
         // Check if the appointment belong to the doctor/patient
-        $appointment = $conn->query("SELECT * FROM `appointment` WHERE eventID=$event_id");
-        if (!$appointment || $appointment->num_rows <= 0){
-            echo("Cannot find appointment for Event $event_id !");
-            session_abort();
-            exit();
-        }
-
-        $appointment_row = $appointment->fetch_assoc();
-        if ($userID != $appointment_row['patientID'] && $userID != $appointment_row['doctorID']){
+        if (
+                ($userID != $event['patientId'] || $userRole != 'patient')  &&
+                ($userID != $event['doctorId'] || $userRole != 'doctor')
+            ){
             echo("You do not belong to the event !");
             session_abort();
             exit();
         }
         else{   // remove the appointment
             // Get full info for notification mail
-            $patientID = $appointment_row['patientID'];
-            $patientEmail = $conn->query("SELECT email FROM patient WHERE ID=$patientID");
+            $event_status = $event['status'];
+            $patientID = $event['patientId'];
+            $patientEmail = $conn->query("SELECT email FROM users WHERE id=$patientID AND role='patient'");
             $patientEmail = $patientEmail->fetch_assoc()['email'];
             
-            $doctorID = $appointment_row['doctorID'];
-            $doctorName = $conn->query("SELECT firstName, lastName  FROM doctor WHERE ID=$doctorID");
-            $doctorName = $doctorName->fetch_assoc();
-            $doctorFullName = $doctorName['firstName'] . " " . $doctorName['lastName'];
+            $docId = $event['doctorId'];
+            $doctorName = $conn->query("SELECT `name`, email  FROM users WHERE id=$docId");
+            $doctorName = $doctorName->fetch_assoc()['name'];
             
-            $event = $event->fetch_assoc();
-            $event_status = $event['status'];
 
-            $appointment_date = $event['eventDate'];
-            $appointment_date_stringArr = explode("-", $event['eventDate']);
-            $appointment_date_string = $appointment_date_stringArr[2] . "/" . $appointment_date_stringArr[1] . "/" . $appointment_date_stringArr[0];
-            
-            $appointment_time = $event['startTime'];
-            $appointment_time_string = substr($appointment_time, 0, 5);
+            $appointment_date = date_parse($event['start']);
+            $appointment_date_string = $appointment_date['day'] . "/" . $appointment_date['month'] . "/" . $appointment_date['year'];
+
+            $appointment_time = $event['start'];
+            $appointment_time_string = substr($appointment_time, 11, 5);
 
             echo("<br>patientEmail: ".$patientEmail);                           //test
-            echo("<br>doctorFullName: ".$doctorFullName);                       //test
+            echo("<br>doctorFullName: ".$doctorName);                           //test
             echo("<br>appointment_date: ".$appointment_date_string);            //test
             echo("<br>appointment_time: ".$appointment_time_string);            //test
 
 
-            // Delete and send notification to patient when doctor cancelled their appointment
-            $res = $conn->query("DELETE FROM `event` WHERE ID=$event_id");
+            // Delete event
+            $res = $conn->query("DELETE FROM `events` WHERE ID='$event_id'");
+
+
+            // Mail content hanlding
             if ($event_status == "pending"){
-                // sendmail_rejectedAppointment($patientEmail, $doctorFullName, $appointment_date_string, $appointment_time_string);
-                echo("<br> Appointment $event_id is rejected by $userRole !");
+                // reject, cancel un-approved appointment
+                if ($userRole == 'patient'){
+                    echo("<br> Appointment $event_id is cancelled by patient (b4 approve) !");
+                }
+                else{
+                    // sendmail_rejectedAppointment($patientEmail, $doctorName, $appointment_date_string, $appointment_time_string);
+                    echo("<br> Appointment $event_id is rejected by Doctor !");
+                }
             }
             else{
                 if ($userRole != 'patient'){
-                    // sendmail_canceledAppointment($patientEmail, $doctorFullName, $appointment_date_string, $appointment_time_string);
+                    // sendmail_canceledAppointment($patientEmail, $doctorName, $appointment_date_string, $appointment_time_string);
                     echo("<br> Appointment $event_id is cancelled by Doctor !");
                 }
                 else{

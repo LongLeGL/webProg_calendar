@@ -2,8 +2,8 @@
     include('email.php');
 
     session_start();
-    $_SESSION['role'] = "doctor";                                                       // test
-    $_SESSION['uId'] = 1;                                                               // test
+    // $_SESSION['role'] = "doctor";                                                       // test
+    // $_SESSION['uId'] = 4;                                                               // test
 
     if (!isset($_SESSION['role']) || $_SESSION['role']!='doctor'){
         echo("Must be signed in as a doctor to approve an appointment !");
@@ -21,11 +21,10 @@
     }
 
 
-    $connection = 'home';
 	$serverName = 'localhost';
 	$username = 'root';
 	$password = '';
-	$dbname = 'convenientappointment';
+	$dbname = 'ConvenientAppointment';
 
     $conn = new mysqli($serverName, $username, $password, $dbname);
     if ($conn->connect_error) {
@@ -34,8 +33,7 @@
 
 
 // Check if provided event id is valid
-    $result = $conn->query("SELECT * FROM appointment WHERE eventID=$appointment_id");
-
+    $result = $conn->query("SELECT * FROM events WHERE id = '$appointment_id'");
 
     if (!$result || $result->num_rows <= 0){
         echo("Cannot find appointment $appointment_id !");
@@ -43,7 +41,7 @@
     else{
 // Check of the logged in doctor is the owner of the event
         $targetEvent = $result->fetch_assoc();
-        $event_docId = $targetEvent['doctorID'];
+        $event_docId = $targetEvent['doctorId'];
         if ($_SESSION['uId'] != $event_docId){
             echo("You are not authorized to approve this appointment !");
             session_abort();
@@ -51,7 +49,7 @@
         }
 
         // Update status to approved
-        $stmt = $conn->prepare("UPDATE `event` SET `status`='approved' WHERE id=?");
+        $stmt = $conn->prepare("UPDATE `events` SET `status`='confirmed' WHERE id=?");
         if ($stmt == false) {
             echo("!! stmt prepare failed: ");
             echo($conn->error);
@@ -62,32 +60,28 @@
         $res = $stmt->execute();
 
         // Get full info for notification mail
-        $patientID = $targetEvent['patientID'];
-        $patientEmail = $conn->query("SELECT email FROM patient WHERE ID=$patientID");
+        $patientID = $targetEvent['patientId'];
+        $patientEmail = $conn->query("SELECT email FROM users WHERE id=$patientID AND role='patient'");
         $patientEmail = $patientEmail->fetch_assoc()['email'];
         
 
-        $doctorName = $conn->query("SELECT firstName, lastName  FROM doctor WHERE ID=$event_docId");
-        $doctorName = $doctorName->fetch_assoc();
-        $doctorFullName = $doctorName['firstName'] . " " . $doctorName['lastName'];
+        $doctorName = $conn->query("SELECT `name`  FROM users WHERE id=$event_docId");
+        $doctorName = $doctorName->fetch_assoc()['name'];
         
-        $event = $conn->query("SELECT * FROM event WHERE id=$appointment_id");
-        $event = $event->fetch_assoc();
 
-        $appointment_date = $event['eventDate'];
-        $appointment_date_stringArr = explode("-", $event['eventDate']);
-        $appointment_date_string = $appointment_date_stringArr[2] . "/" . $appointment_date_stringArr[1] . "/" . $appointment_date_stringArr[0];
-        
-        $appointment_time = $event['startTime'];
-        $appointment_time_string = substr($appointment_time, 0, 5);
+        $appointment_date = date_parse($targetEvent['start']);
+        $appointment_date_string = $appointment_date['day'] . "/" . $appointment_date['month'] . "/" . $appointment_date['year'];
+
+        $appointment_time = $targetEvent['start'];
+        $appointment_time_string = substr($appointment_time, 11, 5);
 
         echo("<br>patientEmail: ".$patientEmail);                           //test
-        echo("<br>doctorFullName: ".$doctorFullName);                       //test
+        echo("<br>doctorFullName: ".$doctorName);                           //test
         echo("<br>appointment_date: ".$appointment_date_string);            //test
         echo("<br>appointment_time: ".$appointment_time_string);            //test
 
-        // sendmail_acceptedAppointment($patientEmail, $doctorFullName, $appointment_date_string, $appointment_time_string, $appointment_id);
-        echo("<br>Approved $appointment_id !");
+        // sendmail_acceptedAppointment($patientEmail, $doctorName, $appointment_date_string, $appointment_time_string, $appointment_id);
+        echo("<br>Approved event: $appointment_id !");
     }
 
     session_abort();
