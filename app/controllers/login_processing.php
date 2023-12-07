@@ -48,7 +48,7 @@
                 $_SESSION['currentUser']['email'] = $row["email"];
                 $_SESSION['currentUser']['role'] = $row["role"];
                 
-                if ($row["role"] == 'patient')  header("Location: patient_homepage.php");
+                if ($row["role"] == 'patient')  header("Location: http://localhost/?page=patientHome");
                 else header("Location: doctor_homepage.php");
                 
                 exit;
