@@ -86,6 +86,7 @@
 								</div>
 							</div>
 						</div>
+						<div class="form-row" id="patient-new-time-slot"></div>
 
 						<div class="form-btn">
 							<button class="submit-btn" id="patient-new-submit-button" disabled>Confirm</button>

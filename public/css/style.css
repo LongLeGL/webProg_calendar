@@ -21,6 +21,10 @@ td.fc-day.fc-past {
   background-color: #EEEEEE;
 }
 
+td {
+  overflow: scroll;
+}
+
 .fc-event {
     border: 1px solid #eee !important;
 }

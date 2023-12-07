@@ -70,10 +70,30 @@ class Calendar extends Controller
 	}
 
 	public function checkTimeSlot($start, $end){
-		$result = $this->model->getEventByDateTime($start, $end);
-		$row = mysqli_fetch_assoc($result);
+		$result = $this->model->getEventCountByDateTime($start, $end);
 
-		echo json_encode($row["count"] == 0);
+		echo json_encode(mysqli_num_rows($result) == 0);
+    }
+
+	public function getEventByDateTime($start, $end){
+		$events = $this->model->getEventByDateTime($start, $end);
+
+		$result = [];
+		while ($row = mysqli_fetch_array($events)) { 
+			$event = [
+				'id' => $row['id'],
+				'start' => $row['start'],
+				'end' => $row['end'],
+				'patientId' => $row['patientId'],
+				'patientName' => $row['patientName'],
+				'doctorId' => $row['doctorId'],
+				'doctorName' => $row['doctorName'],
+				'status' => $row['status'],
+			];
+		
+			$result[] = $event;
+		}
+		echo json_encode($result);
     }
 
 	public function delete(){
@@ -85,6 +105,16 @@ class Calendar extends Controller
 			return json_encode($result);
 		}
     }
+
+	public function getOccupiedTimeSlotsByDoctorAndDate(){
+		$json_data = file_get_contents("php://input");
+		$data = json_decode($json_data, true);
+		
+		if (isset($data['doctorId']) && isset($data['date'])) {
+			$result = $this->model->getOccupiedTimeSlotsByDoctorAndDate($data['doctorId'], $data['date']);
+			return json_encode($result);
+		}
+	}
 }
 
 ?>
