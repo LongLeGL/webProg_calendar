@@ -86,7 +86,7 @@
         echo("<br>appointment_date: ".$appointment_date_string);            //test
         echo("<br>appointment_time: ".$appointment_time_string);            //test
 
-        sendmail_acceptedAppointment($patientEmail, $doctorFullName, $appointment_date_string, $appointment_time_string, $appointment_id);
+        // sendmail_acceptedAppointment($patientEmail, $doctorFullName, $appointment_date_string, $appointment_time_string, $appointment_id);
         echo("<br>Approved $appointment_id !");
     }
 
