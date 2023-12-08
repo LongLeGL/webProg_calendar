@@ -8,7 +8,7 @@
 				<div class="card-body">
 					<form id="doctor-cancel-form" method="POST" action="">
 						<div class="form-row">
-							<div class="name">Your Name</div>
+							<div class="name">Patient Name</div>
 							<div class="value">
 								<div class="input-group">
 								<input class="input--style-5" type="text" class="form-control" id="doctor-cancel-name" name="doctor-cancel-name" value="<?php echo $_SESSION['currentUser']['name'] ?>" disabled>

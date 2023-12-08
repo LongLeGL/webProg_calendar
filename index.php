@@ -12,15 +12,15 @@ session_start();
 // $_SESSION['currentUser']['name'] = 'John Wick';
 // $_SESSION['currentUser']['email'] = 'johnwick@gmail.com';
 
-$_SESSION['currentUser']['role'] = 'patient';
-$_SESSION['currentUser']['id'] = '3';
-$_SESSION['currentUser']['name'] = 'John Cena';
-$_SESSION['currentUser']['email'] = 'johncena@gmail.com';
+// $_SESSION['currentUser']['role'] = 'patient';
+// $_SESSION['currentUser']['id'] = '3';
+// $_SESSION['currentUser']['name'] = 'John Cena';
+// $_SESSION['currentUser']['email'] = 'johncena@gmail.com';
 
-// $_SESSION['currentUser']['role'] = 'doctor';
-// $_SESSION['currentUser']['id'] = '4';
-// $_SESSION['currentUser']['name'] = 'Hannibal Lecter';
-// $_SESSION['currentUser']['email'] = 'hanniballecter@gmail.com';
+$_SESSION['currentUser']['role'] = 'doctor';
+$_SESSION['currentUser']['id'] = '4';
+$_SESSION['currentUser']['name'] = 'Hannibal Lecter';
+$_SESSION['currentUser']['email'] = 'hanniballecter@gmail.com';
 
 
 
