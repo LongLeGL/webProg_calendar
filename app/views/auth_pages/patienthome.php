@@ -52,7 +52,7 @@
         <?php
             while($rows=$result->fetch_assoc()) {
         ?>
-            <a href="http://localhost/appointment/index.php?page=calendar/render/"><button type="submit" ><?php echo $rows['name'];?></button></a>
+            <a href="/?page=calendar/render/<?php echo$rows['id'];?>"><button type="submit" ><?php echo $rows['name'];?></button></a>
             <!-- <button type="submit" ><?php echo $rows['name'];?></button> -->
             <!-- <form action="http://localhost/appointment/index.php?page=calendar/render/">
                 <input type="submit" value="Go to Google" />

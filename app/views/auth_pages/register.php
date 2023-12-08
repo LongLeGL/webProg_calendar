@@ -120,7 +120,7 @@ span.psw {
 	</div>
 
 	<div class="container" style="background-color:#f1f1f1">
-		<button type="button" class="cancelbtn">Cancel</button>
+		<a href='/?page=login'><button type="button" class="cancelbtn">Login</button></a>
 	</div>
 </form>
 

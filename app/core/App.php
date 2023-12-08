@@ -2,7 +2,7 @@
 
 class App
 {
-	protected $controller = 'calendar';
+	protected $controller = 'login';		// what page to open upon firt accessing website
 	protected $method = 'render';
 	protected $params = [];
 

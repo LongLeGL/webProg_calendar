@@ -114,8 +114,8 @@ span.psw {
 	</div>
 
 	<div class="container" style="background-color:#f1f1f1">
-		<button type="button" class="cancelbtn">Cancel</button>
-		<span  style="background-color: white;" class="psw">Forgot <a  style="background-color: white;" href="#">password?</a></span>
+		<a href='/?page=register'><button type="button" class="cancelbtn">Register</button></a>
+		<!-- <span  style="background-color: white;" class="psw">Forgot <a  style="background-color: white;" href="#">password?</a></span> -->
 	</div>
 </form>
 

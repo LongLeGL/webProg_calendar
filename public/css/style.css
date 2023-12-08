@@ -22,7 +22,7 @@ td.fc-day.fc-past {
 }
 
 td {
-  overflow: scroll;
+  overflow-y: scroll;
 }
 
 .fc-event {
