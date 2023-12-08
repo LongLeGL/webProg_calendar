@@ -7,8 +7,6 @@
 				</div>
 				<div class="card-body">
 					<form id="doctor-occupied-form" method="POST" action="">
-						<input type="text" id="doctor-occupied-start" hidden disabled>
-						<input type="text" id="doctor-occupied-end" hidden disabled>
 						<!-- <div class="form-row">
 							<div class="name" id="doctor-occupied-patient-date">Your Name</div>
 							<div class="value">
