@@ -92,9 +92,9 @@ span.psw {
 
 <!-- <h2 style="text-align: center;">Login Form</h2> -->
 
-<form action="login_processing.php" method="post">
+<form action="./app/controllers/login_processing.php" method="post">
 	<div class="imgcontainer">
-		<img style="background-color: white;"  src="img_avatar2.png" alt="Avatar" class="avatar">
+		<img style="background-color: white;"  src="./app/views/auth_pages/img_avatar2.png" alt="Avatar" class="avatar">
 	</div>
 
 	<div class="container">

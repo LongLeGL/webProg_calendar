@@ -44,7 +44,7 @@
     
         insert_user($name, $email, $password, $role);
 
-        header("Location: login.php");
+        header("Location: http://localhost/?page=login");
     }
 
     $mydb->close();
