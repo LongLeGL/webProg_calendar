@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	const ssRole = document.getElementById('ssRole').value;
 	const ssId = document.getElementById('ssId').value;
 	const ssDoctorId = document.getElementById('ssDoctorId').value;
+	const ssDoctorMail = document.getElementById('ssDoctorMail').value;
 
 
 	const calendarEl = document.getElementById('calendar');
@@ -92,6 +93,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	function getEventByDateTime(start, end) {
 		return fetch('index.php?page=calendar/getEventByDateTime/' +start+ "/" +end, {
+			method: 'GET',
+		}).then(response => {
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+			return response.json();
+		}).catch(error => {
+			console.error('Error checking:', error);
+		});
+	}
+
+	function sendEmail(doctorMail, pname, adate, atime, pmail, aid) {
+		return fetch('index.php?page=sendEmail/' +doctorMail+ "/" +pname+ "/" +adate+ "/" +atime+ "/" +pmail+ "/" +aid, {
 			method: 'GET',
 		}).then(response => {
 			if (!response.ok) {
@@ -351,6 +365,8 @@ document.addEventListener('DOMContentLoaded', function () {
 		patientNewModal.hide();
 		patientNewForm.reset();
 		showEmailModal(document.getElementById('patient-new-doctor-name').value);
+		sendEmail(ssDoctorMail, document.getElementById('patient-new-patient-name').value, document.getElementById('patient-new-date').value, document.getElementById('patient-new-hour').value, id)
+
 	});
   
 	patientNewModal._element.addEventListener('hide.bs.modal', function () {

@@ -2,6 +2,7 @@
 	<input type="text" id="ssRole" name="ssRole" value="<?php echo $_SESSION['currentUser']['role'] ?>" hidden disabled>
 	<input type="text" id="ssId" name="ssId" value="<?php echo $_SESSION['currentUser']['id'] ?>" hidden disabled>
 	<input type="text" id="ssDoctorId" name="ssId" value="<?php echo $_SESSION['currentUser']['doctorId'] ?>" hidden disabled>
+	<input type="text" id="ssDoctorMail" name="ssId" value="<?php echo $data['doctor']['email'] ?>" hidden disabled>
 
 	<div id='calendar'></div>
 	<?php require_once "./app/views/components/patient_new_form.php" ?>

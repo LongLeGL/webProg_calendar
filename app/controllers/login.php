@@ -11,71 +11,63 @@ class Login extends Controller
 
 	public function render()
 	{
-		$this->view("auth_layout", [
-			"page"=> 'login',
-		]);
-	}
-
-	private function validate($data){
-		$data = trim($data);
-		$data = stripslashes($data);
-		$data = htmlspecialchars($data);
-	
-		return $data;
+		$this->view("login");
 	}
 
 	public function login()
 	{
-		$result = false;
+		$email = $password = "";
+		$email_err = $password_err = $login_err = "";
 
-		if (isset($_POST['submit'])) {
-			$username = $this->validate($_POST['email']);
-			$password_input = $this->validate($_POST['password']);
+		// Check if the form is submitted
+		if ($_SERVER["REQUEST_METHOD"] == "POST") {
+			$email = $_POST["email"];
+			$password = $_POST["password"];
 
-			$result = $this->model->login($username);
+			$result = $this->model->login($email);
+			// Check if the query returned a row
+			if ($result->num_rows > 0) {
+				$row = mysqli_fetch_assoc($this->model->login($email));
+				$stored_password = $row["pwd"];
+				if (password_verify($password, $stored_password)) {
+					$_SESSION['currentUser']['id'] = $row["id"];
+					$_SESSION['currentUser']['name'] = $row["name"];
+					$_SESSION['currentUser']['email'] = $row["email"];
+					$_SESSION['currentUser']['role'] = $row["role"];
 
-			if (mysqli_num_rows($result)) {
-				while ($row = mysqli_fetch_array($result)) {
-					$id = $row['id'];
-					$username = $row['username'];
-					$password = $row['password'];
-					$name = $row['name'];
-					$province = $row['province'];
-					$district = $row['district'];
-					$ward = $row['ward'];
+					$_SESSION['uncorrectpassword'] = false;
+					$_SESSION['uncorrectemail'] = false;
 
-				}
-				if (password_verify($password_input, $password)) {
-					setcookie("id", $id, time() + 3600, "/");
-					setcookie("username", $username, time() + 3600, "/");
-					setcookie("name", $name, time() + 3600, "/");
-					setcookie("province", $province, time() + 3600, "/");
-					setcookie("district", $district, time() + 3600, "/");
-					setcookie("ward", $ward, time() + 3600, "/");
-					$_SESSION['authenticated'] = true;
-					// $_SESSION['authenticated']["user_level"] = $user_level;
-
-					header('Location: index.php?page=calendar');
+					
+					if ($row["role"] == 'patient')  header("Location: index.php?page=home");
+					else header("Location: index.php?page=calendar/" . $row["id"]);
+					
+					exit;
 				}
 				else {
-					$this->view("auth_layout", [
-						"page"=> 'login',
-					]);
+					$_SESSION['uncorrectemail'] = false;
+					$_SESSION['uncorrectpassword'] = true;
+
+					header("Location: index.php?page=login.php");
+
+					exit;
 				}
 			}
+
+			$_SESSION['uncorrectemail'] = true;
+			header("Location: index.php?page=login.php");
 		}
 	}
 
 	public function logout() {
-		unset($_SESSION['authenticated']);
-		if (isset($_COOKIE["username"])){
-			setcookie("username", '', time() - (3600));
-			setcookie("id", '', time() + 3600, "/");
-			setcookie("name", '', time() + 3600, "/");
-			setcookie("province", '', time() + 3600, "/");
-			setcookie("district", '', time() + 3600, "/");
-			setcookie("ward", '', time() + 3600, "/");
+		$_SESSION = array();
+		session_destroy();
+		
+		if (ini_get("session.use_cookies")) {
+			$params = session_get_cookie_params();
+			setcookie("user", '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
 		}
-		header('Location: index.php?page=calendar');
+
+		exit;
 	}
 }

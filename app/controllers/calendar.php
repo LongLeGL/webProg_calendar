@@ -8,7 +8,13 @@ class Calendar extends Controller
         $this->model = $this->model('calendarModel');
     }
 
-	public function render(){
+	public function render($docId){
+		if ($_SESSION['currentUser']['role'] == 'patient'){
+			$_SESSION['currentUser']['doctorId'] = $docId;
+		} else {
+			$_SESSION['currentUser']['doctorId'] = $_SESSION['currentUser']['id'];
+		}
+
 		$data = [
 			'page' => 'calendar',
 		];
